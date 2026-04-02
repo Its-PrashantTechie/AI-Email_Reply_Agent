@@ -1,0 +1,349 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 2
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "5180cb1d-b766-45f5-a21a-c1c05312470f",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "filters": {
+          "labelIds": [],
+          "readStatus": "unread"
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        224,
+        0
+      ],
+      "id": "7096e513-8d3a-49cb-b622-baafe1389a22",
+      "name": "Get All MAILS",
+      "webhookId": "ee0dd930-07b1-4453-b51e-3c4b2c475eaa",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "BWCavnqDNU1u3MV5",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "messageId": "={{ $json.threadId }}",
+        "simple": false,
+        "options": {
+          "downloadAttachments": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        448,
+        0
+      ],
+      "id": "b67d7da9-2983-4d0b-ad4f-7c2a945d6f93",
+      "name": "GmailAllDetails",
+      "webhookId": "d022493f-1385-42ca-a70f-5bed06552914",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "BWCavnqDNU1u3MV5",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=I want you to reply my emails in very professional way. Some things you must know , I am not open to collaborations or promotions but I am open for meetings , discussions and projects.\n\nI want you to reply on this email: {{ $json.text }}\n\nI want you to draft the reply and give me only the body I dont want you to give me subject line just give me the body text \n\n\nMy name is Pots Steven Henry.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        672,
+        0
+      ],
+      "id": "7640f785-298b-4b26-94ed-b62ce18636b3",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        752,
+        224
+      ],
+      "id": "8d9e6c5f-0268-4555-a446-5e9d44be8f57",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "k32Hu2Lk88dd7yws",
+          "name": "Google Gemini(PaLM) Api account 6"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "markAsRead",
+        "messageId": "={{ $json.fields.ThreadID }}"
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1248,
+        0
+      ],
+      "id": "8be4823a-6ac2-4a7b-b02d-be3f60e68ef0",
+      "name": "Mark a message as read",
+      "webhookId": "0a98580b-9547-49d9-82a3-4d04978d3fbf",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "BWCavnqDNU1u3MV5",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "apprc4mwFbJFOXCmH",
+          "mode": "list",
+          "cachedResultName": "TestForEmailAgent",
+          "cachedResultUrl": "https://airtable.com/apprc4mwFbJFOXCmH"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbl9tMXYJZWyWK0mk",
+          "mode": "list",
+          "cachedResultName": "Table 1",
+          "cachedResultUrl": "https://airtable.com/apprc4mwFbJFOXCmH/tbl9tMXYJZWyWK0mk"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Sender Name": "={{ $('GmailAllDetails').item.json.from.value[0].name }}",
+            "From Email": "={{ $('GmailAllDetails').item.json.from.value[0].address }}",
+            "Email Body": "={{ $('GmailAllDetails').item.json.text }}",
+            "Body Draft Reply": "={{ $json.output }}",
+            "ThreadID": "={{ $('GmailAllDetails').item.json.threadId }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Sender Name",
+              "displayName": "Sender Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "From Email",
+              "displayName": "From Email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Email Body",
+              "displayName": "Email Body",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Body Draft Reply",
+              "displayName": "Body Draft Reply",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "ThreadID",
+              "displayName": "ThreadID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        1024,
+        0
+      ],
+      "id": "7aab3e4b-edfa-4005-b826-1a45d35dccc7",
+      "name": "Maintain Records",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "pHB3I28JONhEhiZc",
+          "name": "Airtable Personal Access Token account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "reply",
+        "messageId": "={{ $json.threadId }}",
+        "emailType": "text",
+        "message": "={{ $('AI Agent').item.json.output }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1472,
+        0
+      ],
+      "id": "70b76123-c4dc-41b0-a725-ae3f6be27323",
+      "name": "Necessary Replies",
+      "webhookId": "9420ebf8-99b5-403a-9987-1405a985173d",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "BWCavnqDNU1u3MV5",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get All MAILS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get All MAILS": {
+      "main": [
+        [
+          {
+            "node": "GmailAllDetails",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GmailAllDetails": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Maintain Records",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark a message as read": {
+      "main": [
+        [
+          {
+            "node": "Necessary Replies",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Maintain Records": {
+      "main": [
+        [
+          {
+            "node": "Mark a message as read",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "80b456a9-20ef-4175-baaa-3d3fdccf82d9",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "6d342e94e85bbcd45c26cf7caba1b9d0bd418e9c1b614e81f3a4c682c9093ea2"
+  },
+  "id": "sdQrVp1WhHMP1eNP",
+  "tags": []
+}
